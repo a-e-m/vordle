@@ -1,6 +1,6 @@
 {
     "title": "Wordle Clone",
-    "rows": 6,
-    "columns": 5,
+    "rows": 10,
+    "columns": 1,
     "start_date": "2022-01-01"
 }
