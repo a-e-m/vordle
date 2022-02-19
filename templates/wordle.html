@@ -191,9 +191,9 @@
                 return result;
             }
 
-            function generateResults(colorHistory) {
+            function generateResults(colorHistory, solved) {
                 let results = ['{{ title }}\n'];
-                results.push(colorHistory.length + ' / {{ rows }}\n');
+                results.push((solved ? colorHistory.length : 'X') + ' / {{ rows }}\n');
                 colorHistory.forEach(
                     row => {
                         row.forEach(
@@ -301,8 +301,8 @@
                             const letter = guesses[row][index];
                             keyEls[letter].className += ' ' + letterColor;
                         }
-                        if (allGreen) {
-                            const resultText = generateResults(colorHistory);
+                        if (allGreen || guesses.length >= rowNum) {
+                            const resultText = generateResults(colorHistory, allGreen);
                             withId('result-container').className += ' done';
                             withId('result-text').innerText = resultText;
                             const copyButton = withId('copy-button');
