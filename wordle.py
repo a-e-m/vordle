@@ -24,7 +24,7 @@ def get_valid_answers(answers='answers.txt'):
 def get_valid_guesses(guesses='guesses.txt', answers='answers.txt'):
     answers = get_valid_answers(answers)
     guesses = get_word_list(guesses)
-    return answers + guesses
+    return {word: True for word in answers + guesses}
 
 
 def get_letters(filename='letters.txt'):

@@ -138,8 +138,12 @@
             const letters = {{ letters }};
             const keyboard = {{ keyboard }};
             const rowNum = {{ rows }};
-            const columnNum = {{ columns }};
             const startDate = {{ start_date }};
+
+            const answer = validAnswers[getDayIndex()];
+            const columnNum = answer.length;
+            document.documentElement.style.setProperty('--columns', columnNum);
+
             const colorMap = {
                 yellow: '🟨',
                 green: '🟩',
@@ -260,8 +264,6 @@
             let colorHistory = [];
 
             let guessesEls = [];
-
-            const answer = validAnswers[getDayIndex()];
             const guessEl = withId('guess-container');
 
             let keyEls = {};
@@ -328,7 +330,7 @@
                 }
 
                 guess = currentGuess.join('');
-                if (guess.length === columnNum && validGuesses.includes(guess)) {
+                if (guess.length === columnNum && validGuesses[guess]) {
                     valid = true;
                     enterKey.disabled = false;
                     enterKey.className = '';
