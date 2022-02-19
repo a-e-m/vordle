@@ -57,8 +57,9 @@ def create():
     kwargs.update(get_metadata())
     kwargs["start_date"] = to_milliseconds(kwargs["start_date"])
     result = template.render(**kwargs)
-    with open('result.html', 'wt', encoding='utf-8') as file:
-        file.write(result)
+    for name in ('result.html', 'index.html'):
+        with open(name, 'wt', encoding='utf-8') as file:
+            file.write(result)
     
 
 if __name__ == '__main__':
