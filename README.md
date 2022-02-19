@@ -1,11 +1,14 @@
 # vordle
 
 Install Jinja2
+
 `pip install Jinja2`
 
 Run `create.py`
+
 `python3 create.py`
-This will updated results to `index.html`
+
+This will write updated results to `index.html`
 
 You can customize the game by editing the included text files and metadata.json
 
