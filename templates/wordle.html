@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, user-scalable=no">
+        <title>{{ title }}</title>
+        <style>
+            :root {
+                --rows: {{ rows }};
+                --columns: {{ columns }};
+                --letter-size: min(calc(60vh / var(--rows)), calc(80vw / var(--columns)));
+                --key-size: min(calc(30vh / 10), calc(100vw / 17));
+                --yellow: #b5933b;
+                --green: #538d4e;
+                --black: #3a3a3c;
+                --background: #121213;
+                --text-color: #eeeeee;
+            }
+
+            body {
+                color: var(--text-color);
+                background-color: var(--background);
+                text-align: center;
+                font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                align-items: center;
+                padding-top: 1vh;
+                height: 90vh;
+                margin: 0;
+            }
+            h1 {
+                margin: 0;
+                font-size: 4vh;
+                font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+            }
+            button {
+                background-color: gray;
+                color: white;
+                border: none;
+                border-radius: calc(var(--key-size) * 0.2);
+                font-size: var(--key-size);
+                margin: calc(var(--key-size) * 0.1);
+                padding: calc(var(--key-size) * 0.5);
+                box-sizing: border-box;
+            }
+            button:hover {
+                background-color: rgb(150, 150, 150);
+            }
+            button:disabled {
+                background-color: #444;
+            }
+            button:active {
+                background-color: rgb(100, 100, 100);
+            }
+            .guess-container {
+                display: flex;
+                flex-wrap: wrap;
+                width: calc((var(--letter-size) * 1.2) * var(--columns));
+                justify-content: flex-start;
+                align-content: flex-start;
+                margin: auto;
+                flex: 1;
+            }
+            .keyboard-container {
+                max-width: 100%;
+                flex: 0;
+                margin: auto;
+            }
+            .guess-row {
+                display: flex;
+                justify-content: center;
+            }
+            .letter {
+                font-size: calc(var(--letter-size) * 0.75);
+                color: white;
+                background-color: #444;
+                margin: calc(var(--letter-size) * 0.1);
+                width: var(--letter-size);
+                height: var(--letter-size);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: 0.5vmin solid gray;
+                box-sizing: border-box;
+            }
+            .empty {
+                margin: calc(var(--letter-size) * 0.1);
+                border: 0.5vmin solid gray;
+                width: var(--letter-size);
+                height: var(--letter-size);
+                box-sizing: border-box;
+            }
+            .letter.yellow, button.yellow {
+                background-color: var(--yellow);
+            }
+            .letter.yellow {
+                border: 0.5vmin solid var(--yellow);
+            }
+            .letter.green, button.green {
+                background-color: var(--green);
+            }
+            .letter.green {
+                border: 0.5vmin solid var(--green);
+            }
+            .letter.black, button.black {
+                background-color: var(--black);
+            }
+            .letter.black {
+                border: 0.5vmin solid var(--black);
+            }
+            .result-container {
+                position: fixed;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                right: 0;
+                display: none;
+                background-color: rgba(0, 0, 0, 0.6);
+            }
+            .result-container.done {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .results {
+                background-color: var(--background);
+                border: 0.5vmin solid black;
+                padding: 10vh;
+            }
+        </style>
+        <script>
+            const validGuesses = {{ valid_guesses }};
+            const validAnswers = {{ valid_answers }};
+            const letters = {{ letters }};
+            const keyboard = {{ keyboard }};
+            const rowNum = {{ rows }};
+            const columnNum = {{ columns }};
+            const startDate = {{ start_date }};
+            const colorMap = {
+                yellow: '🟨',
+                green: '🟩',
+                black :'⬛'
+            };
+
+            function getDayIndex() {
+                return Math.floor((Date.now() - startDate) / (1000 * 60 * 60 * 24));
+            }
+
+            function withId(id) {
+                return document.getElementById(id);
+            }
+
+            function el(tag, text) {
+                const element = document.createElement(tag);
+                if (text) {
+                    const textEl = document.createTextNode(text);
+                    element.appendChild(textEl);
+                }
+                return element;
+            }
+
+            function letterCounter(answer) {
+                const counter = {};
+                for (let index = 0; index < answer.length; ++index) {
+                    const letter = answer[index];
+                    counter[letter] = (counter[letter] || 0) + 1;
+                }
+                return counter;
+            }
+
+            function colors(answer, guess) {
+                const result = [];
+                const counter = letterCounter(answer);
+                for (let index = 0; index < columnNum; ++index) {
+                    const answerLetter = answer[index];
+                    const guessLetter = guess[index];
+                    let color = 'black';
+ 
+                    if (answerLetter === guessLetter) {
+                        color = 'green';
+                    } else if (counter[guessLetter] > 0) {
+                        color = 'yellow';
+                    }
+                    counter[guessLetter] -= 1;
+                    result.push(color);
+                }
+                return result;
+            }
+
+            function generateResults(colorHistory) {
+                let results = ['{{ title }}\n'];
+                results.push(colorHistory.length + ' / {{ rows }}\n');
+                colorHistory.forEach(
+                    row => {
+                        row.forEach(
+                            color => results.push(colorMap[color])
+                        );
+                        results.push('\n');
+                    }
+                );
+                return results.join('');
+            }
+
+            function fallbackCopyTextToClipboard(text) {
+                var textArea = document.createElement("textarea");
+                textArea.value = text;
+                
+                // Avoid scrolling to bottom
+                textArea.style.top = "0";
+                textArea.style.left = "0";
+                textArea.style.position = "fixed";
+
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+
+                try {
+                    var successful = document.execCommand('copy');
+                    var msg = successful ? 'successful' : 'unsuccessful';
+                    console.log('Fallback: Copying text command was ' + msg);
+                } catch (err) {
+                    console.error('Fallback: Oops, unable to copy', err);
+                }
+
+                document.body.removeChild(textArea);
+            }
+            function copyTextToClipboard(text) {
+                if (!navigator.clipboard) {
+                    fallbackCopyTextToClipboard(text);
+                    return;
+                }
+                navigator.clipboard.writeText(text).then(function() {
+                    console.log('Async: Copying to clipboard was successful!');
+                }, function(err) {
+                    console.error('Async: Could not copy text: ', err);
+                });
+            }
+        </script>
+    </head>
+    <body>
+        <h1>{{ title }}</h1>
+        <div id="guess-container" class="guess-container"></div>
+        <div id="keyboard-container" class="keyboard-container"></div>
+        <div id="result-container" class="result-container">
+            <div id="results" class="results">
+                <div id="result-text">
+
+                </div>
+                <button id="copy-button" class="copy-button">Copy Results</button>
+            </div>
+        </div>
+        <script>
+            let currentGuess = [];
+            let guesses = [];
+            let valid = false;
+            let colorHistory = [];
+
+            let guessesEls = [];
+
+            const answer = validAnswers[getDayIndex()];
+            const guessEl = withId('guess-container');
+
+            let keyEls = {};
+            let enterKey = null;
+            let backspaceKey = null;
+
+            for (let y = 0; y < rowNum; ++y) {
+                const row = [];
+                for (let x = 0; x < columnNum; ++x) {
+                    const empty = el("div");
+                    empty.className = 'empty';
+                    guessEl.appendChild(empty);
+                    row.push(empty);
+                }
+                guessesEls.push(row);
+            }
+
+            function letterEntered(letter) {
+                if (!enterKey) {
+                    return;
+                }
+
+                let guess = currentGuess.join('');
+                const row = guesses.length;
+                const column = currentGuess.length;
+
+                if (letter.toUpperCase() === '⏎' || letter.toUpperCase() === 'ENTER') {
+                    if (valid) {
+                        const coloring = colors(answer, guess);
+                        let allGreen = true;
+                        colorHistory.push(coloring);
+                        guesses.push(guess);
+                        for (let index = 0; index < columnNum; ++index) {
+                            const letterColor = coloring[index];
+                            allGreen = (letterColor === 'green') && allGreen;
+                            guessesEls[row][index].className += ' ' + letterColor;
+                            const letter = guesses[row][index];
+                            keyEls[letter].className += ' ' + letterColor;
+                        }
+                        if (allGreen) {
+                            const resultText = generateResults(colorHistory);
+                            withId('result-container').className += ' done';
+                            withId('result-text').innerText = resultText;
+                            const copyButton = withId('copy-button');
+                            copyButton.addEventListener('click', () => {
+                                copyTextToClipboard(resultText);
+                            });
+                        }
+                        currentGuess = [];
+                    }
+                } else if (letter === '⌫' || letter.toUpperCase() === 'BACKSPACE') {
+                    if (currentGuess.pop()) {
+                        const letterEl = guessesEls[row][column - 1];
+                        letterEl.innerText = '';
+                        letterEl.className = 'empty';
+                    }
+                }
+                if (letters.includes(letter) && currentGuess.length < columnNum) {
+                    currentGuess.push(letter);
+                    const letterEl = guessesEls[row][column];
+                    letterEl.className = 'letter';
+                    letterEl.innerText = letter.toUpperCase();
+                }
+
+                guess = currentGuess.join('');
+                if (guess.length === 5 && validGuesses.includes(guess)) {
+                    valid = true;
+                    enterKey.disabled = false;
+                    enterKey.className = '';
+                } else {
+                    valid = false;
+                    enterKey.disabled = true;
+                    enterKey.className = 'disabled';
+                }
+            }
+
+            document.addEventListener("keyup", (ev) => {
+                if (ev.altKey || ev.ctrlKey || ev.metaKey || ev.isComposing) {
+                    return;
+                }
+                letterEntered(ev.key)
+            });
+
+            const keyboardEl = withId("keyboard-container");
+            keyboard.forEach(row => {
+                const rowEl = el("div");
+                row.forEach(letter => {
+                    let classes = '';
+                    if (letter === '<') {
+                        letter = '⌫';
+                    } else if (letter === '>') {
+                        letter = '⏎';
+                    }
+                    const keyButton = el('button', letter);
+                    keyButton.className = classes;
+                    if (letter === '⌫') {
+                        backspaceKey = keyButton;
+                    } else if (letter === '⏎') {
+                        enterKey = keyButton;
+                    } else if (!letters.includes(letter)) {
+                        keyButton.className = 'disabled';
+                        keyButton.disabled = true;
+                    }
+                    keyEls[letter] = keyButton;
+                    keyButton.addEventListener("click", () => letterEntered(letter));
+                    rowEl.appendChild(keyButton);
+                });
+                keyboardEl.appendChild(rowEl);
+            });
+        </script>
+    </body>
+</html>
