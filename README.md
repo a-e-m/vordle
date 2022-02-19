@@ -4,9 +4,9 @@ Install Jinja2
 
 `pip install Jinja2`
 
-Run `create.py`
+Run `wordle.py`
 
-`python3 create.py`
+`python3 wordle.py`
 
 This will write updated results to `index.html`
 
