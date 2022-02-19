@@ -328,7 +328,7 @@
                 }
 
                 guess = currentGuess.join('');
-                if (guess.length === 5 && validGuesses.includes(guess)) {
+                if (guess.length === columns && validGuesses.includes(guess)) {
                     valid = true;
                     enterKey.disabled = false;
                     enterKey.className = '';
