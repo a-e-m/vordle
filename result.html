@@ -183,15 +183,24 @@
                     const answerLetter = answer[index];
                     const guessLetter = guess[index];
                     let color = 'black';
- 
                     if (answerLetter === guessLetter) {
                         color = 'green';
-                    } else if (counter[guessLetter] > 0) {
-                        color = 'yellow';
+                        counter[guessLetter] -= 1;
                     }
-                    counter[guessLetter] -= 1;
+                    
                     result.push(color);
                 }
+                for (let index = 0; index < columnNum; ++index) {
+                    const answerLetter = answer[index];
+                    const guessLetter = guess[index];
+                    let color = result[index];
+                    if (color === 'black' && counter[guessLetter] > 0) {
+                        color = 'yellow';
+                        counter[guessLetter] -= 1;
+                    }
+                    result[index] = color;
+                }
+                
                 return result;
             }
 
