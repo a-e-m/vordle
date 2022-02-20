@@ -346,7 +346,8 @@
                             allGreen = (letterColor === 'green') && allGreen;
                             guessesEls[row][index].className += ' ' + letterColor;
                             const letter = guesses[row][index];
-                            keyEls[letter].className += ' ' + letterColor;
+                            const prevKeyColor = keyEls[letter].className;
+                            keyEls[letter].className = (prevKeyColor === 'green') ? prevKeyColor : letterColor;
                         }
                         if (allGreen || guesses.length >= rowNum) {
                             done = true;
