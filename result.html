@@ -10,6 +10,7 @@
                 --columns: 5;
                 --letter-size: min(calc(60vh / var(--rows)), calc(80vw / var(--columns)));
                 --key-size: min(calc(30vh / 10), calc(100vw / 17));
+                --gray: #444;
                 --yellow: #b5933b;
                 --green: #538d4e;
                 --black: #3a3a3c;
@@ -50,10 +51,7 @@
                 background-color: rgb(150, 150, 150);
             }
             button:disabled {
-                background-color: #444;
-            }
-            button:active {
-                background-color: rgb(100, 100, 100);
+                background-color: var(--gray);
             }
             .guess-container {
                 display: flex;
@@ -77,7 +75,7 @@
             .letter {
                 font-size: calc(var(--letter-size) * 0.75);
                 color: white;
-                background-color: #444;
+                background-color: var(--gray);
                 margin: calc(var(--letter-size) * 0.1);
                 width: var(--letter-size);
                 height: var(--letter-size);
@@ -94,23 +92,41 @@
                 height: var(--letter-size);
                 box-sizing: border-box;
             }
+            @keyframes flip {
+                from {
+                    transform: perspective(50vh) rotateX(0deg);
+                    background-color: var(--gray);
+                    border-color: gray;
+                }
+
+                45% {
+                    transform: perspective(50vh) rotateX(90deg);
+                    background-color: var(--gray);
+                    border-color: var(--gray);
+                }
+
+                55% {
+                    transform: perspective(50vh) rotateX(90deg) scaleY(-1);
+                }
+
+                to {
+                    transform: perspective(50vh) rotateX(180deg) scaleY(-1);
+                }
+            }
+            .letter.yellow, .letter.green, .letter.black {
+                animation: flip 1s;
+            }
             .letter.yellow, button.yellow {
                 background-color: var(--yellow);
-            }
-            .letter.yellow {
-                border: 0.5vmin solid var(--yellow);
+                border-color: var(--yellow);
             }
             .letter.green, button.green {
                 background-color: var(--green);
-            }
-            .letter.green {
-                border: 0.5vmin solid var(--green);
+                border-color: var(--green);
             }
             .letter.black, button.black {
                 background-color: var(--black);
-            }
-            .letter.black {
-                border: 0.5vmin solid var(--black);
+                border-color: var(--black);
             }
             .result-container {
                 position: fixed;
@@ -278,6 +294,7 @@
             let keyEls = {};
             let enterKey = null;
             let backspaceKey = null;
+            let done = false;
 
             for (let y = 0; y < rowNum; ++y) {
                 const row = [];
@@ -291,7 +308,11 @@
             }
 
             function letterEntered(letter) {
-                if (!enterKey) {
+                if (letter.toUpperCase() === 'ESCAPE') {
+                    withId('result-container').className = 'result-container';
+                }
+
+                if (!enterKey || done) {
                     return;
                 }
 
@@ -313,6 +334,7 @@
                             keyEls[letter].className += ' ' + letterColor;
                         }
                         if (allGreen || guesses.length >= rowNum) {
+                            done = true;
                             const resultText = generateResults(colorHistory, allGreen);
                             withId('result-container').className += ' done';
                             withId('result-text').innerText = resultText;
