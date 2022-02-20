@@ -351,8 +351,8 @@
                             allGreen = (letterColor === 'green') && allGreen;
                             guessesEls[row][index].className += ' ' + letterColor;
                             const letter = guesses[row][index];
-                            const prevKeyColor = keyEls[letter].className || 'black';
-                            if (scoreMap[prevKeyColor] < scoreMap[letterColor]) {
+                            const prevKeyScore = scoreMap[keyEls[letter].className] || -1;
+                            if (prevKeyScore < scoreMap[letterColor]) {
                                 keyEls[letter].className = letterColor;
                             }
                         }
