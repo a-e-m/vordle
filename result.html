@@ -180,6 +180,11 @@
                 green: '🟩',
                 black :'⬛'
             };
+            const scoreMap = {
+                black: 0,
+                yellow: 1,
+                green: 2
+            }
 
             function getDayIndex() {
                 return Math.floor((Date.now() - startDate) / (1000 * 60 * 60 * 24));
@@ -346,8 +351,10 @@
                             allGreen = (letterColor === 'green') && allGreen;
                             guessesEls[row][index].className += ' ' + letterColor;
                             const letter = guesses[row][index];
-                            const prevKeyColor = keyEls[letter].className;
-                            keyEls[letter].className = (prevKeyColor === 'green') ? prevKeyColor : letterColor;
+                            const prevKeyColor = keyEls[letter].className || 'black';
+                            if (scoreMap[prevKeyColor] < scoreMap[letterColor]) {
+                                keyEls[letter].className = letterColor;
+                            }
                         }
                         if (allGreen || guesses.length >= rowNum) {
                             done = true;
