@@ -128,6 +128,20 @@
                 background-color: var(--black);
                 border-color: var(--black);
             }
+            @keyframes fadein {
+                from {
+                    display: flex;
+                    opacity: 0;
+                }
+
+                50% {
+                    opacity: 0;
+                }
+
+                to {
+                    opacity: 1;
+                }
+            }
             .result-container {
                 position: fixed;
                 top: 0;
@@ -138,6 +152,7 @@
                 background-color: rgba(0, 0, 0, 0.6);
             }
             .result-container.done {
+                animation: fadein 2s;
                 display: flex;
                 align-items: center;
                 justify-content: center;
