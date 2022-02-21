@@ -318,6 +318,21 @@
                     console.error('Async: Could not copy text: ', err);
                 });
             }
+
+            function resultsPopup(colorHistory, allGreen) {
+                const resultText = generateResults(colorHistory, allGreen);
+                withId('result-container').className += ' done';
+                withId('result-text').innerText = resultText;
+                const copyButton = withId('copy-button');
+                copyButton.addEventListener('click', () => {
+                    copyTextToClipboard(resultText);
+                    withId('result-container').className = 'result-container';
+                });
+                const exitButton = withId('exit-button');
+                exitButton.addEventListener('click', () => {
+                    withId('result-container').className = 'result-container';
+                });
+            }
         </script>
     </head>
     <body>
@@ -330,6 +345,7 @@
 
                 </div>
                 <button id="copy-button" class="copy-button">Copy Results</button>
+                <button id="exit-button" class="exit-button">Close</button>
             </div>
         </div>
         <script>
@@ -346,9 +362,35 @@
             let backspaceKey = null;
             let done = false;
 
+            let loadFromStorage = false;
+            const currentDay = getDayIndex();
+            const storedDay = parseInt(localStorage.getItem("day"));
+            if (currentDay === storedDay) {
+                loadFromStorage = true;
+                guesses = JSON.parse(localStorage.getItem("guesses"));
+                colorHistory = JSON.parse(localStorage.getItem("colorHistory"));
+                const allGreen = JSON.parse(localStorage.getItem("allGreen"));
+                if (allGreen !== null && allGreen !== undefined) {
+                    resultsPopup(colorHistory, allGreen);
+                }
+            } else {
+                localStorage.setItem("allGreen", "null")
+            }
+            localStorage.setItem("day", currentDay);
+
             for (let y = 0; y < rowNum; ++y) {
                 const row = [];
                 for (let x = 0; x < columnNum; ++x) {
+                    if (loadFromStorage && guesses[y] && colorHistory[y]) {
+                        const letter = guesses[y][x];
+                        const color = colorHistory[y][x];
+                        const letterEl = el("div");
+                        letterEl.className = "letter " + color;
+                        letterEl.innerText = letter.toUpperCase();
+                        guessEl.appendChild(letterEl);
+                        row.push(letterEl);
+                        continue;
+                    }
                     const empty = el("div");
                     empty.className = 'empty';
                     guessEl.appendChild(empty);
@@ -375,7 +417,9 @@
                         const coloring = colors(answer, guess);
                         let allGreen = true;
                         colorHistory.push(coloring);
+                        localStorage.setItem("colorHistory", JSON.stringify(colorHistory));
                         guesses.push(guess);
+                        localStorage.setItem("guesses", JSON.stringify(guesses));
                         for (let index = 0; index < columnNum; ++index) {
                             const letterColor = coloring[index];
                             allGreen = (letterColor === 'green') && allGreen;
@@ -388,14 +432,8 @@
                         }
                         if (allGreen || guesses.length >= rowNum) {
                             done = true;
-                            const resultText = generateResults(colorHistory, allGreen);
-                            withId('result-container').className += ' done';
-                            withId('result-text').innerText = resultText;
-                            const copyButton = withId('copy-button');
-                            copyButton.addEventListener('click', () => {
-                                copyTextToClipboard(resultText);
-                                withId('result-container').className = 'result-container';
-                            });
+                            localStorage.setItem("allGreen", allGreen);
+                            resultsPopup(colorHistory, allGreen);
                         }
                         currentGuess = [];
                     }
@@ -463,7 +501,6 @@
                 keyboardEl.appendChild(rowEl);
             });
             enterKey.style.width = window.getComputedStyle(backspaceKey).width;
-            console.log(window.getComputedStyle(backspaceKey).width);
         </script>
     </body>
 </html>
