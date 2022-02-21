@@ -9,7 +9,7 @@
                 --rows: {{ rows }};
                 --columns: {{ columns }};
                 --letter-size: min(calc(60vh / var(--rows)), calc(80vw / var(--columns)));
-                --key-size: min(calc(30vh / 10), calc(100vw / 17));
+                --key-size: min(calc(30vh / 11), calc(100vw / 20));
                 --gray: #444;
                 --yellow: #b5933b;
                 --green: #538d4e;
@@ -37,6 +37,18 @@
                 font-size: 4vh;
                 font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
             }
+            @keyframes buttonpress {
+                from {
+                    background-color: rgb(150, 150, 150);
+                }
+                50% {
+                    background-color: rgb(150, 150, 150);
+                    background-color: gray;
+                }
+                to {
+                    background-color: gray;
+                }
+            }
             button {
                 background-color: gray;
                 color: white;
@@ -50,8 +62,16 @@
             button:hover {
                 background-color: rgb(150, 150, 150);
             }
+            button:focus {
+                animation: buttonpress 0.5s;
+                background-color: gray;
+            }
             button:disabled {
                 background-color: var(--gray);
+            }
+            .keyboard-container button {
+                min-width: calc(1.7 * var(--key-size));
+                height: calc(2.5 * var(--key-size));
             }
             .guess-container {
                 display: flex;
@@ -72,7 +92,16 @@
                 display: flex;
                 justify-content: center;
             }
+            @keyframes letterenter {
+                from {
+                    transform: scale(0.96);
+                }
+                to {
+                    transform: scale(1);
+                }
+            }
             .letter {
+                animation: letterenter 0.1s;
                 font-size: calc(var(--letter-size) * 0.75);
                 color: white;
                 background-color: var(--gray);
@@ -277,6 +306,7 @@
 
                 document.body.removeChild(textArea);
             }
+
             function copyTextToClipboard(text) {
                 if (!navigator.clipboard) {
                     fallbackCopyTextToClipboard(text);
