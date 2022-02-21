@@ -367,14 +367,14 @@
             const storedDay = parseInt(localStorage.getItem("day"));
             if (currentDay === storedDay) {
                 loadFromStorage = true;
-                guesses = JSON.parse(localStorage.getItem("guesses"));
-                colorHistory = JSON.parse(localStorage.getItem("colorHistory"));
+                guesses = JSON.parse(localStorage.getItem("guesses")) || guesses;
+                colorHistory = JSON.parse(localStorage.getItem("colorHistory")) || colorHistory;
                 const allGreen = JSON.parse(localStorage.getItem("allGreen"));
                 if (allGreen !== null && allGreen !== undefined) {
                     resultsPopup(colorHistory, allGreen);
                 }
             } else {
-                localStorage.setItem("allGreen", "null")
+                localStorage.clear();
             }
             localStorage.setItem("day", currentDay);
 
