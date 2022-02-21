@@ -39,14 +39,14 @@
             }
             @keyframes buttonpress {
                 from {
-                    background-color: rgb(150, 150, 150);
+                    opacity: 0.8;
                 }
                 50% {
-                    background-color: rgb(150, 150, 150);
-                    background-color: gray;
+                    opacity: 0.8;
+                    opacity: 1;
                 }
                 to {
-                    background-color: gray;
+                    opacity: 1;
                 }
             }
             button {
@@ -462,6 +462,8 @@
                 });
                 keyboardEl.appendChild(rowEl);
             });
+            enterKey.style.width = window.getComputedStyle(backspaceKey).width;
+            console.log(window.getComputedStyle(backspaceKey).width);
         </script>
     </body>
 </html>
