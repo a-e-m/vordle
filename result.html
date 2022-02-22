@@ -371,33 +371,15 @@
                 colorHistory = JSON.parse(localStorage.getItem("colorHistory")) || colorHistory;
                 const allGreen = JSON.parse(localStorage.getItem("allGreen"));
                 if (allGreen !== null && allGreen !== undefined) {
+                    done = true;
                     resultsPopup(colorHistory, allGreen);
                 }
             } else {
-                localStorage.clear();
+                localStorage.removeItem("guesses");
+                localStorage.removeItem("colorHistory");
+                localStorage.removeItem("allGreen");
             }
             localStorage.setItem("day", currentDay);
-
-            for (let y = 0; y < rowNum; ++y) {
-                const row = [];
-                for (let x = 0; x < columnNum; ++x) {
-                    if (loadFromStorage && guesses[y] && colorHistory[y]) {
-                        const letter = guesses[y][x];
-                        const color = colorHistory[y][x];
-                        const letterEl = el("div");
-                        letterEl.className = "letter " + color;
-                        letterEl.innerText = letter.toUpperCase();
-                        guessEl.appendChild(letterEl);
-                        row.push(letterEl);
-                        continue;
-                    }
-                    const empty = el("div");
-                    empty.className = 'empty';
-                    guessEl.appendChild(empty);
-                    row.push(empty);
-                }
-                guessesEls.push(row);
-            }
 
             function letterEntered(letter) {
                 if (letter.toUpperCase() === 'ESCAPE') {
@@ -501,6 +483,31 @@
                 keyboardEl.appendChild(rowEl);
             });
             enterKey.style.width = window.getComputedStyle(backspaceKey).width;
+
+            for (let y = 0; y < rowNum; ++y) {
+                const row = [];
+                for (let x = 0; x < columnNum; ++x) {
+                    if (loadFromStorage && guesses[y] && colorHistory[y]) {
+                        const letter = guesses[y][x];
+                        const color = colorHistory[y][x];
+                        const letterEl = el("div");
+                        const prevKeyScore = scoreMap[keyEls[letter].className] || -1;
+                        if (prevKeyScore < scoreMap[color]) {
+                            keyEls[letter].className = color;
+                        }
+                        letterEl.className = "letter " + color;
+                        letterEl.innerText = letter.toUpperCase();
+                        guessEl.appendChild(letterEl);
+                        row.push(letterEl);
+                        continue;
+                    }
+                    const empty = el("div");
+                    empty.className = 'empty';
+                    guessEl.appendChild(empty);
+                    row.push(empty);
+                }
+                guessesEls.push(row);
+            } 
         </script>
     </body>
 </html>
