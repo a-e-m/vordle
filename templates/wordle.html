@@ -59,12 +59,13 @@
                 padding: calc(var(--key-size) * 0.5);
                 box-sizing: border-box;
             }
-            button:hover {
-                background-color: rgb(150, 150, 150);
+            @media (pointer: fine) {
+                button:hover {
+                    background-color: rgb(150, 150, 150);
+                }
             }
-            button:focus {
+            button:active {
                 animation: buttonpress 0.5s;
-                background-color: gray;
             }
             button:disabled {
                 background-color: var(--gray);
